@@ -4,6 +4,7 @@
 #include <string.h>
 #include "../memory.h"
 #include "../buffer.h"
+#include "packet.h"
 
 static game_conf_t* game_conf = NULL;
 
@@ -30,11 +31,6 @@ void intialize_game_module()
 void handle_game_connection(session_t* session)
 {
 	printf("user connected\n");
-
-	buffer_t* buffer = new_buffer(32);
-	buffer_add_str(buffer, "Welcome friend!\n");
-	session_write(session, buffer);
-	free_buffer(buffer);
 }
 
 void handle_game_disconnection(session_t* session)
@@ -44,7 +40,19 @@ void handle_game_disconnection(session_t* session)
 
 void handle_game_data(session_t* session, buffer_t* buffer)
 {
-	printf("handling game data: %s", buffer->payload);
+	packet_t* packet = packet_decode(buffer);
+	if (packet == NULL)
+	{
+		// disconnect the user
+		printf("Error decoding packet, disconnecting user.\n");
+		free_session(session);
+		return;
+	}
+	else
+	{
+		printf("Received packet %u\n", packet->id);
+	}
+	free_packet(packet);
 }
 
 void handle_game_error(game_err error)

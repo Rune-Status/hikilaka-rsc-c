@@ -18,6 +18,7 @@ void on_connect(lw_server server, lw_server_client client)
 void on_disconnect(lw_server server, lw_server_client client)
 {
 	session_t* session = lw_stream_tag(client);
+	session->client = client;
 
 	handle_game_disconnection(session);
 
@@ -32,6 +33,7 @@ void on_data(lw_server server, lw_server_client client, const char* buf, size_t 
 	memcpy(bytes, buf, len);
 
 	session_t* session = lw_stream_tag(client);
+	session->client = client;
 	buffer_t* buffer = buffer_wrap(bytes, len);
 	
 	handle_game_data(session, buffer);
