@@ -8,11 +8,14 @@ packet_t* packet_decode(buffer_t* buffer)
 	int error = buffer_ok;
 	uint16_t length;
 	uint8_t id;
+
+	buffer->position = 0;
+
 	error |= buffer_get_short(buffer, &length);
 	error |= buffer_get_byte(buffer, &id);
 	error |= buffer_available(buffer) == length;
 
-	if (error || length > 5000)
+	if (error || length > 5000 || length == 0)
 		return NULL;
 
 	uint8_t payload[length];

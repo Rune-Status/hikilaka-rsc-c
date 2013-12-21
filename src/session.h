@@ -28,6 +28,12 @@ session_t* new_session(struct ev_loop* loop, struct ev_io* watcher);
 void free_session(session_t* session);
 
 /**
+ * Disconnects a connection while also freeing the allocated
+ * memory by calling free_session.
+ */
+void session_disconnect(session_t* session);
+
+/**
  * Writes a buffer to the underlying socket of a session.
  * This allows the game modules to not have direct access to the
  * networking implementation.

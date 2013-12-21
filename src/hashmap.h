@@ -22,7 +22,7 @@ typedef struct {
 
 typedef int (*PFany)(void*, void*);
 
-hashmap_t* new_hashmap();
+hashmap_t* new_hashmap(void);
 
 void free_hashmap(hashmap_t* in);
 

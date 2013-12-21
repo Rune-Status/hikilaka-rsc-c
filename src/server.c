@@ -1,18 +1,15 @@
+#include "server.h"
+
 #include <stdio.h>
+#include <string.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <ev.h>
-#include "hashmap.h"
-#include "game.h"
 #include "buffer.h"
 #include "memory.h"
 #include "session.h"
-
-static game_conf_t* config;
-static hashmap_t* connections;
-static size_t active_connections = 0;
 
 void handle_read(struct ev_loop* loop, struct ev_io* watcher, int flags)
 {
@@ -40,10 +37,7 @@ void handle_read(struct ev_loop* loop, struct ev_io* watcher, int flags)
 	if (read == 0)
 	{
 		// connection closed
-		handle_game_disconnection(session);
-		free_session(session);
-		hashmap_remove(connections, watcher->fd);
-		--active_connections;
+		session_disconnect(session);
 	}
 	else
 	{
@@ -62,13 +56,6 @@ void handle_accept(struct ev_loop* loop, struct ev_io* watcher, int flags)
 	if (EV_ERROR & flags)
 	{
 		perror("Invalid event in game core");
-		return;
-	}
-
-	if (active_connections >= config->max_connections)
-	{
-		// over our max allowed connections
-		// leave the connection hanging until it times out?
 		return;
 	}
 
@@ -97,7 +84,6 @@ void handle_accept(struct ev_loop* loop, struct ev_io* watcher, int flags)
 		return;
 	}
 
-	++active_connections;
 	handle_game_connection(session);
 }
 
@@ -105,10 +91,11 @@ int main(int argc, char* argv[])
 {
 	connections = new_hashmap();
 	config = load_game_configuration();
-	printf("Initiated module %s!\n", config->name);
+	printf("Loaded configuration for %s!\n", config->name);
 	printf("Starting game server on port %u\n", config->port);
 	printf("Client buffer size: %lu\n", config->buffer_size);
-	printf("Maximum allowed connections: %lu\n", config->max_connections);
+
+	intialize_game_module();
 
 	struct ev_loop* loop = ev_default_loop(EVFLAG_AUTO);
 	struct ev_io accept_watcher;
@@ -122,6 +109,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+    memset(&address, 0, address_size);
 	address.sin_family = AF_INET;
 	address.sin_port = htons(config->port);
 	address.sin_addr.s_addr = INADDR_ANY;
@@ -147,6 +135,8 @@ int main(int argc, char* argv[])
 	ev_io_init(&accept_watcher, handle_accept, descriptor, EV_READ);
 	ev_io_start(loop, &accept_watcher);
 
-	for (;;) ev_loop(loop, 0);
+	printf("Awaiting connections..\n");
+
+	ev_loop(loop, 0);
 	return 0;
 }

@@ -11,7 +11,6 @@ typedef struct
 	char* name;
 	uint16_t port;
 	size_t buffer_size;
-	size_t max_connections;
 } game_conf_t;
 
 typedef enum
@@ -26,13 +25,13 @@ typedef enum
  * has been initialized. The configuration struct
  * will not be deallocated automatically by the core.
  */
-game_conf_t* load_game_configuration();
+game_conf_t* load_game_configuration(void);
 
 /**
  * Initializes the games inner module, this should load things
  * such as entity definitions and other sub-modules (if any).
  */
-void intialize_game_module();
+void intialize_game_module(void);
 
 /**
  * Handles an incomming connection to the game.

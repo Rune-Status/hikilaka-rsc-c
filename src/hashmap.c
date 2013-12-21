@@ -6,7 +6,7 @@
 
 #define INITIAL_SIZE 1024
 
-hashmap_t* new_hashmap()
+hashmap_t* new_hashmap(void)
 {
 	hashmap_t* m = safe_alloc(sizeof(hashmap_t));
 	if(!m)
