@@ -1,7 +1,7 @@
 TARGET = rsc-c
 CC = clang
 
-LIBS = -L/usr/local/lib -llacewing
+LIBS = -L/usr/local/lib -lev
 INCLUDE = -I. -I/usr/local/include
 
 CFLAGS = -std=c99 -Ofast -Wall $(INCLUDE)

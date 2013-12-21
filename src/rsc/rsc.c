@@ -19,6 +19,8 @@ game_conf_t* load_game_configuration()
 	conf->name = safe_calloc(6, sizeof(char));
 	memcpy(conf->name, "rsc-c", 5);
 	conf->port = 43595;
+	conf->buffer_size = 5000;
+	conf->max_connections = 300;
 	return conf;
 }
 
@@ -40,6 +42,7 @@ void handle_game_disconnection(session_t* session)
 
 void handle_game_data(session_t* session, buffer_t* buffer)
 {
+	/*
 	packet_t* packet = packet_decode(buffer);
 	if (packet == NULL)
 	{
@@ -53,6 +56,9 @@ void handle_game_data(session_t* session, buffer_t* buffer)
 		printf("Received packet %u\n", packet->id);
 	}
 	free_packet(packet);
+	*/
+	printf("%s", buffer->payload);
+	session_write(session, buffer);
 }
 
 void handle_game_error(game_err error)

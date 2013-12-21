@@ -10,6 +10,8 @@ typedef struct
 {
 	char* name;
 	uint16_t port;
+	size_t buffer_size;
+	size_t max_connections;
 } game_conf_t;
 
 typedef enum
