@@ -9,13 +9,14 @@ LFLAGS = -Wall $(LIBS) $(INCLUDE)
 
 SRCDIR = src
 BINDIR = bin
-SOURCES := $(wildcard $(SRCDIR)/*.c) $(wildcard $(SRCDIR)/rsc/*.c)
+SOURCES := $(wildcard $(SRCDIR)/*.c) $(wildcard $(SRCDIR)/rsc/*.c) $(wildcard $(SRCDIR)/rsc/io/*.c)
 OBJECTS := $(SOURCES:$(SRCDIR)/%.c=$(BINDIR)/%.o)
 
 all: clean mkdir $(OBJECTS) link
 
 mkdir:
 	@mkdir -p $(BINDIR)/rsc
+	@mkdir -p $(BINDIR)/rsc/io
 
 bin/%.o: src/%.c
 	@echo Compiling $<...
