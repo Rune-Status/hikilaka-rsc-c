@@ -24,6 +24,7 @@ packet_t* packet_decode(buffer_t* buffer)
 	packet_t* packet = safe_alloc(sizeof(packet_t));
 	packet->id = id;
 	packet->buffer = buffer_wrap(payload, length);
+	packet->buffer->position = 0;
 	return packet;
 }
 

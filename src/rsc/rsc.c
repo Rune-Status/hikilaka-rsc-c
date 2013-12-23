@@ -6,8 +6,10 @@
 #include "../buffer.h"
 #include "packet.h"
 #include "p_handlers.h"
+#include "io/io_device.h"
 
 static game_conf_t* game_conf = NULL;
+static io_device_t* io_device;
 
 game_conf_t* load_game_configuration(void)
 {
@@ -25,16 +27,13 @@ game_conf_t* load_game_configuration(void)
 	return conf;
 }
 
-int test_handler(session_t* session, packet_t* packet)
+int session_req_handle(session_t* session, packet_t* packet)
 {
-	printf("Handling session request packet\n");
-	int errors;
 	uint32_t uuid;
-	errors = packet_get_int(packet, &uuid);
+	int errors = packet_get_int(packet, &uuid);
 	if (errors)
 	{
 		session_disconnect(session);
-		return 1;
 	}
 	else
 	{
@@ -43,14 +42,60 @@ int test_handler(session_t* session, packet_t* packet)
 		session_write(session, buffer);
 		free_buffer(buffer);
 	}
-	return 0;
+	return errors;
+}
+
+int login_req_handle(session_t* session, packet_t* packet)
+{
+	uint8_t reconnect, pass_len;
+	uint32_t version;
+	uint64_t user;
+
+	int errors = packet_get_byte(packet, &reconnect);
+	errors |= packet_get_int(packet, &version);
+	errors |= packet_get_long(packet, &user);
+	errors |= packet_get_byte(packet, &pass_len);
+
+	if (errors)
+	{
+		session_disconnect(session);
+		return errors;
+	}
+
+	char pass[pass_len];
+	errors |= packet_get_str(packet, pass, pass_len);
+
+	if (errors)
+	{
+		// yes, recheck for errors just incase reading
+		// the password failed.
+		session_disconnect(session);
+	}
+	else
+	{
+		printf("Attempted log in, hash: %llu, password: %s, reconnecting: %d, client version: %d\n", user, pass, reconnect, version);
+		
+		player_login_res response = io_device->load_player(user, pass, pass_len, reconnect, version);
+		buffer_t* buffer = new_buffer(1);
+		buffer_add_byte(buffer, response);
+		session_write(session, buffer);
+		free_buffer(buffer);
+
+		if (response > reconnect_ok)
+		{
+			session_disconnect(session);
+		}
+	}
+	return errors;
 }
 
 void intialize_game_module(void)
 {
 	// load entity descriptors,
 	// start game engine, etc.
-	packet_handler_register(32, &test_handler);
+	io_device = get_io_device();
+	packet_handler_register(32, &session_req_handle);
+	packet_handler_register(77, &login_req_handle);
 }
 
 void handle_game_connection(session_t* session)
