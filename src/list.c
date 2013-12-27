@@ -25,8 +25,9 @@ void list_clear(list_t* list)
     list_node_t* cur = list->head;
     while (cur != NULL)
     {
+        list_node_t* next = cur->next;
         free(cur);
-        cur = cur->next;
+        cur = next;
     }
     list->size = 0;
     list->head = list->tail = NULL;
