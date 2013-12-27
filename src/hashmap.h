@@ -8,6 +8,11 @@
 #define MAP_OMEM -1
 #define MAP_OK 0
 
+/**
+ * Written by Elliott Back
+ * Taken from http://elliottback.com/wp/hashmap-implementation-in-c/
+ */
+
 typedef struct {
 	int key;
 	int in_use;
