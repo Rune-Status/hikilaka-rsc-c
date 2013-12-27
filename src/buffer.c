@@ -1,7 +1,6 @@
 #include "buffer.h"
 
 #include <string.h>
-#include <assert.h>
 #include "memory.h"
 
 buffer_t* buffer_wrap(uint8_t* payload, size_t size)
@@ -25,8 +24,6 @@ buffer_t* new_buffer(size_t init_size)
 
 void free_buffer(buffer_t* buffer)
 {
-	assert(buffer->payload != NULL);
-	assert(buffer);
 	free(buffer->payload);
 	free(buffer);
 }
